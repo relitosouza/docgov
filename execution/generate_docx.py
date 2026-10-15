@@ -185,17 +185,6 @@ def generate_report_docx(data: Dict[str, Any], output_path: str) -> str:
             run_sub.font.size = Pt(10)
             run_sub.font.color.rgb = COLOR_MUTED
 
-        tipo_doc = data.get("tipo_documento")
-        if tipo_doc:
-            p_badge = cell_text.add_paragraph()
-            p_badge.paragraph_format.space_before = Pt(0)
-            p_badge.paragraph_format.space_after = Pt(4)
-            run_badge = p_badge.add_run(f"[{tipo_doc}]")
-            run_badge.font.name = FONT_FAMILY
-            run_badge.font.size = Pt(9)
-            run_badge.font.bold = True
-            run_badge.font.color.rgb = COLOR_PRIMARY_LIGHT
-
     else:
         # Sem logo: Layout padrão
         p_title = doc.add_paragraph()
@@ -216,17 +205,6 @@ def generate_report_docx(data: Dict[str, Any], output_path: str) -> str:
             run_sub.font.name = FONT_FAMILY
             run_sub.font.size = Pt(10)
             run_sub.font.color.rgb = COLOR_MUTED
-
-        tipo_doc = data.get("tipo_documento")
-        if tipo_doc:
-            p_badge = doc.add_paragraph()
-            p_badge.paragraph_format.space_before = Pt(0)
-            p_badge.paragraph_format.space_after = Pt(8)
-            run_badge = p_badge.add_run(f"[{tipo_doc}]")
-            run_badge.font.name = FONT_FAMILY
-            run_badge.font.size = Pt(9)
-            run_badge.font.bold = True
-            run_badge.font.color.rgb = COLOR_PRIMARY_LIGHT
 
     # Linha divisória fina (border-bottom azul do cabeçalho)
     p_div = doc.add_paragraph()
