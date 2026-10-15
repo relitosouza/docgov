@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocGov - Sistema Institucional de Relatórios</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="brasao.png">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Barra Superior -->
+    <header class="app-header">
+      <div class="brand">
+        <img src="brasao.png" alt="Brasão da Prefeitura" class="brand-brasao">
+        <div>
+          <h1>DocGov</h1>
+          <span class="badge-status">Sistema Institucional de Relatórios &middot; A4 &middot; DOCX &middot; PDF</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btnToggleTheme" class="btn btn-secondary btn-theme" title="Alternar entre modo escuro e claro" aria-label="Alternar tema">
+          <span id="themeIcon">☀️</span>
+          <span id="themeLabel">Modo Claro</span>
+        </button>
+        <button id="btnSample" class="btn btn-secondary">
+          <span>✨ Carregar Exemplo</span>
+        </button>
+        <button id="btnClear" class="btn btn-ghost">
+          <span>Limpar</span>
+        </button>
+        <button id="btnGenerate" class="btn btn-primary">
+          <span>⚡ Formatar Relatório</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Área Principal Dividida (Split Screen) -->
+    <main class="workspace">
+      <!-- Painel Esquerdo: Entrada -->
+      <section class="panel editor-panel">
+        <div class="panel-header">
+          <div class="tab-title">
+            <span>📝 Texto / Arquivo de Entrada</span>
+          </div>
+          <div class="header-tools-group">
+            <button id="btnToggleToolbar" class="btn btn-sm btn-outline btn-collapse-toggle" title="Abrir ou recolher configurações avançadas de título, layout e parâmetros">
+              <span id="collapseIcon">⚙️</span>
+              <span>Parâmetros</span>
+              <span id="paramsActiveCount" class="params-badge-count" style="display:none">0</span>
+              <span id="collapseArrow" class="collapse-arrow">▼</span>
+            </button>
+            <div class="file-upload-wrapper">
+              <input type="file" id="fileInput" accept=".txt,.md,.docx,.pdf" style="display:none">
+              <button id="btnUpload" class="btn btn-sm btn-outline">
+                📁 Importar Arquivo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="collapsible-toolbar-wrapper" id="collapsibleToolbar" style="display:none;">
+          <div class="editor-options">
+          <!-- Linha 1: Metadados Principais com Rótulos Claros -->
+          <div class="options-row primary-inputs">
+            <div class="input-group-field flex-2">
+              <label for="titleOverride" class="field-micro-label">Título do Documento</label>
+              <input type="text" id="titleOverride" placeholder="Ex: ATA DE AUDIÊNCIA PÚBLICA..." class="input-title">
+            </div>
+            <div class="input-group-field flex-1">
+              <label for="deptOverride" class="field-micro-label">Órgão / Secretaria</label>
+              <input type="text" id="deptOverride" placeholder="Ex: Secretaria de Obras..." class="input-sub">
+            </div>
+            <div class="input-group-field flex-1">
+              <label for="authorOverride" class="field-micro-label">Responsável / Autor</label>
+              <input type="text" id="authorOverride" placeholder="Ex: Nome do relator..." class="input-sub">
+            </div>
+          </div>
+
+          <!-- Linha 2: Barra de Configurações e Parâmetros de Formato -->
+          <div class="options-row config-bar">
+            <!-- Grupo 1: Brasão / Logo -->
+            <div class="config-cluster">
+              <span class="cluster-title">Símbolo</span>
+              <div class="config-group logo-group">
+                <input type="file" id="logoFileInput" accept="image/*" style="display:none">
+                <button id="btnUploadLogo" type="button" class="btn btn-xs btn-outline" title="Alterar Brasão ou Logotipo Oficial">
+                  🏛️ Brasão
+                </button>
+                <div id="logoPreviewContainer" class="logo-preview-badge" style="display:none">
+                  <img id="logoThumb" src="" alt="Logo">
+                  <span id="logoFileName">logo.png</span>
+                  <button id="btnRemoveLogo" class="btn-remove" title="Remover Logo personalizado">&times;</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="config-divider"></div>
+
+            <!-- Grupo 2: Layout e Página -->
+            <div class="config-cluster">
+              <span class="cluster-title">Layout</span>
+              <div class="config-group selects-group">
+                <div class="select-field">
+                  <label for="selectOrientation">Orientação:</label>
+                  <select id="selectOrientation" class="select-sig">
+                    <option value="portrait" selected>📄 Retrato</option>
+                    <option value="landscape">📑 Paisagem</option>
+                  </select>
+                </div>
+
+                <div class="select-field">
+                  <label for="selectSignature">Assinatura:</label>
+                  <select id="selectSignature" class="select-sig">
+                    <option value="sim" selected>Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="config-divider"></div>
+
+            <!-- Grupo 3: Estrutura / Exibição -->
+            <div class="config-cluster flex-grow">
+              <span class="cluster-title">Elementos Visuais</span>
+              <div class="config-group toggles-group">
+                <label class="checkbox-container" title="Exibir quadro de identificação com Órgão, Responsável e Código">
+                  <input type="checkbox" id="checkMetaBox" checked>
+                  <span class="checkbox-label">Quadro de Identificação</span>
+                </label>
+
+                <label class="checkbox-container" title="Exibir ou ocultar o subtítulo no cabeçalho">
+                  <input type="checkbox" id="checkSubtitle" checked>
+                  <span class="checkbox-label">Subtítulo</span>
+                </label>
+
+                <label class="checkbox-container" title="Exibir título 'Descrição Geral' em blocos de texto sem seção numerada">
+                  <input type="checkbox" id="checkDescricaoGeral">
+                  <span class="checkbox-label">Descrição Geral</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+        <!-- Zona Drag & Drop / Editor -->
+        <div class="editor-wrapper" id="dropZone">
+          <div class="drop-overlay" id="dropOverlay">
+            <div class="drop-message">
+              <span>📂 Solte o arquivo aqui para importar</span>
+            </div>
+          </div>
+          <textarea id="rawInput" placeholder="Cole seu texto aqui ou arraste um arquivo .txt / .md...
+
+Exemplo:
+# Título do Relatório
+Órgão: Secretaria de Obras
+Autor: Eng. João da Silva
+Data: 14/10/2026
+
+## 1. OBJETIVO
+Descrição detalhada aqui..."></textarea>
+        </div>
+
+        <div class="editor-footer">
+          <div class="stats-group">
+            <span id="charCount">0 caracteres</span>
+            <span class="dot-separator">&middot;</span>
+            <span id="wordCount">0 palavras</span>
+          </div>
+          <div class="footer-hints">
+            <span id="formatStatus" class="format-status">⚡ Atualização em tempo real ativa</span>
+            <span id="saveStatus" class="save-status">💾 Rascunho salvo</span>
+            <span class="hint-kbd"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Painel Direito: Pré-visualização -->
+      <section class="panel preview-panel">
+        <div class="panel-header">
+          <div class="tab-title">
+            <span>👁️ Visualização Prévia do Relatório</span>
+          </div>
+          <div class="preview-actions">
+            <button id="btnCopyHtml" class="btn btn-sm btn-ghost-light" style="display:none;" title="Copiar código HTML do relatório">
+              📋 Copiar HTML
+            </button>
+            <a id="btnDownloadDocx" href="#" download class="btn btn-sm btn-outline" style="display:none; color: #1e3a8a; border-color: #93c5fd; background: #eff6ff;">
+              📥 Baixar DOCX (.docx)
+            </a>
+            <button id="btnPrint" class="btn btn-sm btn-accent" disabled>
+              🖨️ Salvar em PDF / Imprimir
+            </button>
+            <a id="btnOpenNewTab" href="#" target="_blank" class="btn btn-sm btn-outline" style="display:none">
+              ↗️ Abrir em Nova Aba
+            </a>
+          </div>
+        </div>
+
+        <!-- Metadados Extraídos Resumo -->
+        <div class="extracted-meta-bar" id="metaBar" style="display:none">
+          <div class="meta-tag" id="tagOrgao">Órgão: -</div>
+          <div class="meta-tag" id="tagAutor">Autor: -</div>
+          <div class="meta-tag" id="tagData">Data: -</div>
+          <div class="meta-tag" id="tagSecoes">Seções: 0</div>
+        </div>
+
+        <!-- Frame de Pré-visualização -->
+        <div class="preview-wrapper">
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon">📄</div>
+            <h3>Nenhum relatório formatado ainda</h3>
+            <p>Escreva o texto ou importe um arquivo ao lado e clique em <strong>"Formatar Relatório"</strong>.</p>
+          </div>
+          <iframe id="previewFrame" title="Prévia do Relatório"></iframe>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# Ambientes Virtuais e Dependências
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Arquivos de Runtime e Saídas
+outputs/*.html
+outputs/*.docx
+inputs/temp_upload*
+.tmp/
+
+# Logs e Sistema
+*.log
+.DS_Store
+.vscode/
+.idea/
