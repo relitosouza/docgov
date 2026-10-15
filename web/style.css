@@ -404,7 +404,7 @@ body {
 
 .primary-inputs {
   display: grid;
-  grid-template-columns: 2fr 1.2fr 1.2fr;
+  grid-template-columns: 1.5fr 1.5fr 1fr 1fr;
   gap: 12px;
 }
 

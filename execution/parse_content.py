@@ -188,24 +188,33 @@ def parse_document_content(raw_content: str) -> Dict[str, Any]:
             continue
 
         # Detecta entidade / órgão ou título no topo antes do corpo principal
-        if stripped.startswith("# ") and not stripped.startswith("## ") and not data["titulo"]:
+        if stripped.startswith("# ") and not stripped.startswith("## "):
             header_text = stripped[2:].strip()
             is_gov_entity = re.search(r"(?:prefeitura|c[âa]mara|secretaria|governo|tribunal|minist[ée]rio)", header_text, re.IGNORECASE)
             
             if re.search(r"^ata\s*(?:de\s*audi[êe]ncia\s*p[úu]blica)?$", header_text, re.IGNORECASE):
                 data["tipo_documento"] = "Ata de Audiência Pública"
+                if not data["titulo"]:
+                    data["titulo"] = "ATA DE AUDIÊNCIA PÚBLICA"
                 continue
 
             if not data["orgao"] and is_gov_entity:
                 data["orgao"] = header_text
                 continue
-            else:
+            elif not data["titulo"]:
                 data["titulo"] = header_text
                 continue
+            elif not data["subtitulo"]:
+                data["subtitulo"] = header_text
+                continue
 
-        # Detecta subtítulo caso seja um ## inicial antes das seções
-        if stripped.startswith("## ") and not data["subtitulo"] and not data["secoes"] and not re.match(r"^##\s*\d+[\.\)]", stripped):
+        # Detecta subtítulo caso seja um ## inicial antes das seções ou linha com **Subtítulo:**
+        if (stripped.startswith("## ") and not data["subtitulo"] and not data["secoes"] and not re.match(r"^##\s*\d+[\.\)]", stripped)):
             data["subtitulo"] = stripped[3:].strip()
+            continue
+        elif not data["subtitulo"] and data["titulo"] and not data["secoes"] and (stripped.startswith("**") and stripped.endswith("**") and len(stripped) < 120 and not ":" in stripped):
+            # Ex: **LEI ORÇAMENTÁRIA ANUAL — LOA 2027** logo após o título
+            data["subtitulo"] = stripped.strip("*").strip()
             continue
 
         remaining_lines.append(line)

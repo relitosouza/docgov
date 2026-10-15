@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const rawInput = document.getElementById("rawInput");
   const titleOverride = document.getElementById("titleOverride");
+  const subtitleOverride = document.getElementById("subtitleOverride");
   const authorOverride = document.getElementById("authorOverride");
   const deptOverride = document.getElementById("deptOverride");
   const charCount = document.getElementById("charCount");
@@ -46,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateParamsActiveCount() {
     let count = 0;
     if (titleOverride.value.trim()) count++;
+    if (subtitleOverride && subtitleOverride.value.trim()) count++;
     if (deptOverride.value.trim()) count++;
     if (authorOverride.value.trim()) count++;
     if (currentLogoBase64) count++;
@@ -142,6 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const draft = {
         text: rawInput.value,
         title: titleOverride.value,
+        subtitleVal: subtitleOverride ? subtitleOverride.value : "",
         dept: deptOverride.value,
         author: authorOverride.value,
         orientation: selectOrientation.value,
@@ -167,6 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const draft = JSON.parse(saved);
         if (draft.text) rawInput.value = draft.text;
         if (draft.title) titleOverride.value = draft.title;
+        if (draft.subtitleVal && subtitleOverride) subtitleOverride.value = draft.subtitleVal;
         if (draft.dept) deptOverride.value = draft.dept;
         if (draft.author) authorOverride.value = draft.author;
         if (draft.orientation) selectOrientation.value = draft.orientation;
@@ -220,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
     triggerLiveFormat(500); // formata 500ms após o usuário parar de digitar
   });
 
-  [titleOverride, deptOverride, authorOverride].forEach(input => {
+  [titleOverride, subtitleOverride, deptOverride, authorOverride].filter(Boolean).forEach(input => {
     input.addEventListener("input", () => {
       updateParamsActiveCount();
       saveDraft();
@@ -309,6 +313,7 @@ Recomenda-se a notificação imediata da empresa executora para reforçar a equi
   btnSample.addEventListener("click", () => {
     rawInput.value = sampleText;
     titleOverride.value = "";
+    if (subtitleOverride) subtitleOverride.value = "";
     deptOverride.value = "";
     authorOverride.value = "";
     updateCounters();
@@ -321,6 +326,7 @@ Recomenda-se a notificação imediata da empresa executora para reforçar a equi
   btnClear.addEventListener("click", () => {
     rawInput.value = "";
     titleOverride.value = "";
+    if (subtitleOverride) subtitleOverride.value = "";
     authorOverride.value = "";
     deptOverride.value = "";
     currentLogoBase64 = "";
@@ -386,6 +392,7 @@ Recomenda-se a notificação imediata da empresa executora para reforçar a equi
           const result = await res.json();
           if (result.success) {
             if (result.title) titleOverride.value = result.title;
+            if (result.subtitle && subtitleOverride) subtitleOverride.value = result.subtitle;
             if (result.orgao) deptOverride.value = result.orgao;
             if (result.autor) authorOverride.value = result.autor;
             if (result.logo) {
@@ -396,6 +403,7 @@ Recomenda-se a notificação imediata da empresa executora para reforçar a equi
             }
             rawInput.value = result.markdown || "";
             updateCounters();
+            updateParamsActiveCount();
             saveDraft();
             formatReport(false);
           } else {
@@ -431,6 +439,7 @@ Recomenda-se a notificação imediata da empresa executora para reforçar a equi
           const result = await res.json();
           if (result.success) {
             if (result.title) titleOverride.value = result.title;
+            if (result.subtitle && subtitleOverride) subtitleOverride.value = result.subtitle;
             if (result.orgao) deptOverride.value = result.orgao;
             if (result.autor) authorOverride.value = result.autor;
             if (result.logo) {
@@ -441,6 +450,7 @@ Recomenda-se a notificação imediata da empresa executora para reforçar a equi
             }
             rawInput.value = result.markdown || "";
             updateCounters();
+            updateParamsActiveCount();
             saveDraft();
             formatReport(false);
           } else {
@@ -500,6 +510,7 @@ Recomenda-se a notificação imediata da empresa executora para reforçar a equi
         body: jsonBody({
           text: text,
           title: titleOverride.value.trim(),
+          subtitle: subtitleOverride ? subtitleOverride.value.trim() : "",
           author: authorOverride.value.trim(),
           orgao: deptOverride.value.trim(),
           logo: currentLogoBase64,

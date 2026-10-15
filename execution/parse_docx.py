@@ -122,6 +122,10 @@ def parse_docx_file(file_path: str) -> DocumentModel:
                 # Primeiro parágrafo em destaque antes de qualquer seção é o título do documento
                 model.titulo = text
                 continue
+            elif model.titulo != "Relatório Institucional" and not model.subtitulo and not model.secoes and not current_section.title and not current_sec_html_parts and text and not re.match(r"^\d+[\.\)]", text) and len(text) < 140:
+                # Segundo parágrafo em destaque logo após o título vira o subtítulo
+                model.subtitulo = text
+                continue
             elif "heading 1" in style_name or "heading 2" in style_name or re.match(r"^(?:\d+[\.\)]\s*)?[A-ZÁÉÍÓÚÂÊÔÃÕÇ\s\(\)\/\-]{4,}:?$", text):
                 close_section()
                 current_section.title = text

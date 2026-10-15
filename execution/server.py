@@ -65,6 +65,7 @@ class ReportRequestHandler(SimpleHTTPRequestHandler):
                 payload = json.loads(post_data)
                 raw_text = payload.get("text", "")
                 title_override = payload.get("title", "").strip() or None
+                subtitle_override = payload.get("subtitle", "").strip() or None
                 author_override = payload.get("author", "").strip() or None
                 orgao_override = payload.get("orgao", "").strip() or None
                 logo_override = payload.get("logo", "").strip() or None
@@ -73,6 +74,8 @@ class ReportRequestHandler(SimpleHTTPRequestHandler):
                 data = parse_document_content(raw_text)
                 if title_override:
                     data["titulo"] = title_override
+                if subtitle_override is not None:
+                    data["subtitulo"] = subtitle_override
                 if author_override:
                     data["autor"] = author_override
                     data["autor_val"] = author_override
@@ -97,7 +100,7 @@ class ReportRequestHandler(SimpleHTTPRequestHandler):
                 # Exibir quadro de identificação/metadados no cabeçalho
                 data["include_meta_box"] = payload.get("include_meta_box", True)
 
-                # Controle de subtítulo (ex: Documento Oficial de Registro e Encaminhamento)
+                # Controle de visibilidade do subtítulo
                 if not payload.get("include_subtitle", True):
                     data["subtitulo"] = ""
 
