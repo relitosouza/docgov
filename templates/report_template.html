@@ -437,6 +437,30 @@
       color: var(--primary);
     }
 
+    /* Diagramas Mermaid nativos */
+    .mermaid-diagram {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0 18px 0;
+      page-break-inside: avoid;
+      text-align: center;
+      overflow-x: auto;
+    }
+
+    .mermaid-diagram pre.mermaid {
+      margin: 0;
+      background: transparent;
+      font-family: inherit;
+    }
+
+    .mermaid-diagram svg {
+      max-width: 100%;
+      height: auto;
+    }
+
     /* Bloco de Assinaturas */
     .signature-grid {
       display: grid;
@@ -662,5 +686,13 @@
     </table>
   </div>
 
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      flowchart: { useMaxWidth: true, htmlLabels: true }
+    });
+  </script>
 </body>
 </html>

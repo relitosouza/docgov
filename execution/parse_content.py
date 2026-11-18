@@ -351,7 +351,10 @@ def format_text_block(text: str) -> str:
         lang = (match.group(1) or "").strip().lower()
         body = match.group(2)
 
-        if lang in ("mermaid", "flowchart", "graph", "fluxo") or any(_is_flow_line(l) for l in body.splitlines()):
+        if lang == "mermaid":
+            escaped_mermaid = html_lib.escape(body.strip())
+            parts.append(f'<div class="mermaid-diagram"><pre class="mermaid">{escaped_mermaid}</pre></div>')
+        elif lang in ("flowchart", "graph", "fluxo") or any(_is_flow_line(l) for l in body.splitlines()):
             parts.append(flowchart_to_html(body))
         else:
             escaped_code = html_lib.escape(body.strip())
