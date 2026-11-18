@@ -268,8 +268,8 @@ def generate_report_docx(data: Dict[str, Any], output_path: str) -> str:
             run_sec.font.color.rgb = COLOR_PRIMARY
 
         # Processamento do conteúdo:
-        if '<table class="data-table">' in content_html:
-            parts = re.split(r'(<table class="data-table">.*?</table>)', content_html, flags=re.DOTALL)
+        if '<table class="data-table">' in content_html or '<div class="flow-diagram">' in content_html:
+            parts = re.split(r'(<table class="data-table">.*?</table>|<div class="flow-diagram">.*?</div>\s*</div>)', content_html, flags=re.DOTALL)
             for part in parts:
                 part = part.strip()
                 if not part:
@@ -308,6 +308,8 @@ def generate_report_docx(data: Dict[str, Any], output_path: str) -> str:
                                     run.font.color.rgb = COLOR_BODY_TEXT
                         
                         doc.add_paragraph().paragraph_format.space_after = Pt(8)
+                elif part.startswith('<div class="flow-diagram">'):
+                    render_flowchart_to_docx(doc, part)
                 else:
                     render_html_text_to_docx(doc, part)
         else:
@@ -352,9 +354,80 @@ def generate_report_docx(data: Dict[str, Any], output_path: str) -> str:
     doc.save(output_path)
     return output_path
 
+def render_flowchart_to_docx(doc, flow_html: str):
+    """Converte o componente .flow-diagram em uma tabela de fluxo institucional estilizada no DOCX."""
+    # Extrai cada card e conectores em ordem
+    cards = re.findall(
+        r'<div class="flow-step-card"[^>]*>.*?<span class="flow-step-num">(.*?)</span>\s*<span class="flow-step-title">(.*?)</span>(.*?)</div>(?=\s*(?:<div class="flow-connector"|</div>\s*</div>))',
+        flow_html,
+        flags=re.DOTALL,
+    )
+    connectors = re.findall(
+        r'<div class="flow-connector">(.*?)</div>',
+        flow_html,
+        flags=re.DOTALL,
+    )
+
+    if not cards:
+        return
+
+    rows_data = [("Etapa", "Fase do Fluxo", "Transição / Desvios")]
+    for idx, (num_str, title_str, rest_html) in enumerate(cards):
+        clean_num = re.sub(r"<[^>]+>", "", num_str).strip()
+        clean_title = re.sub(r"<[^>]+>", "", title_str).strip()
+        branches = [
+            re.sub(r"<[^>]+>", "", b).strip()
+            for b in re.findall(r'<div class="flow-step-branch">(.*?)</div>', rest_html, flags=re.DOTALL)
+        ]
+
+        next_info = []
+        if idx < len(cards) - 1:
+            next_title = re.sub(r"<[^>]+>", "", cards[idx + 1][1]).strip()
+            edge_lbl = ""
+            if idx < len(connectors):
+                lbl_m = re.search(r'<span class="flow-edge-label">(.*?)</span>', connectors[idx], flags=re.DOTALL)
+                if lbl_m:
+                    edge_lbl = re.sub(r"<[^>]+>", "", lbl_m.group(1)).strip()
+            if edge_lbl:
+                next_info.append(f"✓ {edge_lbl} → {next_title}")
+            else:
+                next_info.append(f"→ {next_title}")
+        else:
+            next_info.append("Etapa Final")
+
+        for b in branches:
+            next_info.append(b)
+
+        rows_data.append((clean_num, clean_title, " | ".join(next_info)))
+
+    docx_table = doc.add_table(rows=len(rows_data), cols=3)
+    docx_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    docx_table.style = "Table Grid"
+
+    for r_idx, row in enumerate(rows_data):
+        for c_idx, cell_text in enumerate(row):
+            cell = docx_table.cell(r_idx, c_idx)
+            set_cell_margins(cell, top=80, bottom=80, left=120, right=120)
+            if r_idx == 0:
+                set_cell_background(cell, COLOR_BG_META_HEX)
+            p = cell.paragraphs[0]
+            p.paragraph_format.space_before = Pt(0)
+            p.paragraph_format.space_after = Pt(0)
+            run = p.add_run(cell_text)
+            run.font.name = FONT_FAMILY
+            run.font.size = Pt(9.5)
+            if r_idx == 0 or c_idx in (0, 1):
+                run.font.bold = True
+                run.font.color.rgb = COLOR_PRIMARY_DARK
+            else:
+                run.font.color.rgb = COLOR_BODY_TEXT
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
+
+
 def render_html_text_to_docx(doc, html_snippet: str):
-    """Interpreta parágrafos (<p>), itens de lista (<li>), subtítulos (<h4>) e imagens (<figure>)."""
-    raw_blocks = re.findall(r'(<(?:p|li|h4|figure)[^>]*>.*?</(?:p|li|h4|figure)>)', html_snippet, flags=re.DOTALL)
+    """Interpreta parágrafos (<p>), itens de lista (<li>), subtítulos (<h4>), blocos de código (<pre>) e imagens (<figure>)."""
+    raw_blocks = re.findall(r'(<(?:p|li|h4|figure|pre)[^>]*>.*?</(?:p|li|h4|figure|pre)>)', html_snippet, flags=re.DOTALL)
     if not raw_blocks:
         clean = re.sub(r'<[^>]+>', '', html_snippet).strip()
         if clean:
@@ -414,6 +487,15 @@ def render_html_text_to_docx(doc, html_snippet: str):
             run.font.size = Pt(10.5)
             run.font.bold = True
             run.font.color.rgb = COLOR_PRIMARY_DARK
+        elif block.startswith('<pre'):
+            text = re.sub(r'<[^>]+>', '', block).strip()
+            p = doc.add_paragraph()
+            p.paragraph_format.space_before = Pt(6)
+            p.paragraph_format.space_after = Pt(6)
+            run = p.add_run(text)
+            run.font.name = "Consolas"
+            run.font.size = Pt(9.5)
+            run.font.color.rgb = COLOR_TEXT
         elif block.startswith('<li'):
             text = re.sub(r'</?li[^>]*>', '', block).strip()
             p = doc.add_paragraph(style='List Bullet')
@@ -430,23 +512,28 @@ def render_html_text_to_docx(doc, html_snippet: str):
             parse_html_inline_to_runs(p, text)
 
 def parse_html_inline_to_runs(paragraph, text: str):
-    """Converte <strong>...</strong> e <em>...</em> em runs com estilo no docx."""
-    tokens = re.split(r'(</?(?:strong|em|b|i)>)', text)
+    """Converte <strong>...</strong>, <em>...</em> e <code>...</code> em runs com estilo no docx."""
+    tokens = re.split(r'(</?(?:strong|em|b|i|code)(?:\s+[^>]*)?>)', text)
     is_bold = False
     is_italic = False
+    is_code = False
 
     for token in tokens:
         if not token:
             continue
         lower = token.lower()
-        if lower in ('<strong>', '<b>'):
+        if lower.startswith('<strong') or lower.startswith('<b'):
             is_bold = True
         elif lower in ('</strong>', '</b>'):
             is_bold = False
-        elif lower in ('<em>', '<i>'):
+        elif lower.startswith('<em') or lower.startswith('<i'):
             is_italic = True
         elif lower in ('</em>', '</i>'):
             is_italic = False
+        elif lower.startswith('<code'):
+            is_code = True
+        elif lower == '</code>':
+            is_code = False
         else:
             clean_text = re.sub(r'<[^>]+>', '', token)
             pattern = re.compile(r'(\*\*\s*.*?\s*\*\*|\*(?!\*)\s*.*?\s*\*(?!\*))')
@@ -456,19 +543,19 @@ def parse_html_inline_to_runs(paragraph, text: str):
                     continue
                 if st.startswith('**') and st.endswith('**') and len(st) >= 4:
                     run = paragraph.add_run(st[2:-2].strip())
-                    run.font.name = FONT_FAMILY
+                    run.font.name = "Consolas" if is_code else FONT_FAMILY
                     run.bold = True
                     run.italic = is_italic
-                    run.font.color.rgb = COLOR_TEXT
+                    run.font.color.rgb = COLOR_PRIMARY_DARK if is_code else COLOR_TEXT
                 elif st.startswith('*') and st.endswith('*') and len(st) >= 2:
                     run = paragraph.add_run(st[1:-1].strip())
-                    run.font.name = FONT_FAMILY
-                    run.bold = is_bold
+                    run.font.name = "Consolas" if is_code else FONT_FAMILY
+                    run.bold = is_bold or is_code
                     run.italic = True
-                    run.font.color.rgb = COLOR_BODY_TEXT
+                    run.font.color.rgb = COLOR_PRIMARY_DARK if is_code else COLOR_BODY_TEXT
                 else:
                     run = paragraph.add_run(st)
-                    run.font.name = FONT_FAMILY
-                    run.bold = is_bold
+                    run.font.name = "Consolas" if is_code else FONT_FAMILY
+                    run.bold = is_bold or is_code
                     run.italic = is_italic
-                    run.font.color.rgb = COLOR_BODY_TEXT if not is_bold else COLOR_TEXT
+                    run.font.color.rgb = COLOR_PRIMARY_DARK if is_code else (COLOR_BODY_TEXT if not is_bold else COLOR_TEXT)

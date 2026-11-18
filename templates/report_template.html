@@ -285,6 +285,158 @@
       font-style: italic;
     }
 
+    /* Código Inline e Blocos de Código */
+    code.inline-code {
+      font-family: "JetBrains Mono", "Consolas", monospace;
+      font-size: 11.5px;
+      background-color: #f1f5f9;
+      color: var(--primary-dark);
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      font-weight: 600;
+    }
+
+    pre.code-block {
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--primary);
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin: 14px 0;
+      overflow-x: auto;
+      font-family: "JetBrains Mono", "Consolas", monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text);
+      text-align: left;
+    }
+
+    a.doc-link {
+      color: var(--primary);
+      text-decoration: underline;
+      font-weight: 500;
+    }
+
+    /* Diagramas de Fluxo (Mermaid / Setas) */
+    .flow-diagram {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 16px 0 18px 0;
+      page-break-inside: avoid;
+      text-align: left;
+    }
+
+    .flow-diagram-header {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .flow-track {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      gap: 10px 6px;
+    }
+
+    .flow-step-card {
+      background: #ffffff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 8px 11px;
+      min-width: 130px;
+      max-width: 210px;
+      flex: 1 1 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .flow-step-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .flow-step-num {
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 10.5px;
+      font-weight: 700;
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .flow-step-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary-dark);
+      line-height: 1.3;
+    }
+
+    .flow-step-branches {
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .flow-step-branch {
+      padding: 3px 7px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 4px;
+      font-size: 10.5px;
+      color: #92400e;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    .flow-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 2px;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .flow-edge-label {
+      font-size: 9.5px;
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 700;
+      margin-bottom: 2px;
+      white-space: nowrap;
+    }
+
+    .flow-arrow {
+      font-size: 16px;
+      line-height: 1;
+      color: var(--primary);
+    }
+
     /* Bloco de Assinaturas */
     .signature-grid {
       display: grid;
