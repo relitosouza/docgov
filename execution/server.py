@@ -23,8 +23,9 @@ from generate_docx import generate_report_docx
 
 WEB_DIR = os.path.join(BASE_DIR, "web")
 TEMPLATE_PATH = os.path.join(BASE_DIR, "templates", "report_template.html")
-OUTPUTS_DIR = os.path.join(BASE_DIR, "outputs")
-INPUTS_DIR = os.path.join(BASE_DIR, "inputs")
+_WRITABLE_BASE = "/tmp" if os.environ.get("VERCEL") else BASE_DIR
+OUTPUTS_DIR = os.path.join(_WRITABLE_BASE, "outputs")
+INPUTS_DIR = os.path.join(_WRITABLE_BASE, "inputs")
 
 def cleanup_old_outputs(directory: str, max_age_hours: int = 24):
     """Remove arquivos gerados mais antigos que max_age_hours para manter o disco enxuto."""
